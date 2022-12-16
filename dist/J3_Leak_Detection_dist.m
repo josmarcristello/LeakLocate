@@ -8,6 +8,8 @@
 %    dataset_path: Full path for the dataset folder of the project.
 %% TODO
 %    Include option to test both single files and multiple files (batch)
+%    Currently, I have to generate a datastore. Figure out a way to
+%    classify direct from a variable (i.e. memory)
 %% Main
 
 clear;close all;clc;
@@ -17,17 +19,24 @@ if(~isdeployed)
 end
 
 %% Import test file
-    file_path = fullfile('F:\Onedrive\OneDrive - University of Calgary\LeakLocate\dataset\2. Simulated\batch sim 2\loc_0_relSize_1_leakStartTime_30_isLeak_1_gasMixture_CH4_Hyd_90.mat');
-    [cwt_inlet, cwt_outlet] = generate_cwt(file_path, "pressure", "inlet", false);
-    img_test = cwt_inlet;
-    %imshow(img_test);
+file_path = fullfile('F:\Onedrive\OneDrive - University of Calgary\LeakLocate\dataset\2. Simulated\batch sim 2\loc_0_relSize_1_leakStartTime_50_isLeak_0_gasMixture_CH4_Hyd_90.mat');
+
+%% Generate CWT
+[cwt_inlet, cwt_outlet, cwt_folder] = generate_cwt(file_path, "pressure", "inlet", true, 'amor', 2, 70);
+img_test = cwt_inlet;
+figure; imshow(img_test); % Comment out to not display the image
+
 %% Import pre-trained CNN
-    load("trained_CNN.mat");
+load("trained_CNN.mat");
+
+%% Creating Datastore
+image_datastore = imageDatastore(cwt_folder,'IncludeSubfolders',true); % the classfication subject is labelled as the folder name
 
 %% Classify the image
-[leak_preds,score] = classify(leak_net,cwt_inlet); 
+[leak_preds] = classify(leak_net, image_datastore); 
+%[leak_preds] = predict(leak_net, [cwt_inlet]); 
 disp(leak_preds);
-disp(score);
+%disp(score);
 
 %% Confusion Matrix
 %plotconfusion(YValidation,leak_preds)
