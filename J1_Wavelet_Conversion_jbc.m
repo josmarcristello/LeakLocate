@@ -12,9 +12,13 @@ end
 %valve = strcat('full');
 %valve = strcat('half');
 
-path = 'Dataset\2. Simulated\batch sim 2\';        % Input Data
-cnn_path = 'Dataset\3. WT_Converted\batch sim 2\velocity\'; % Output Data (where to save)
+path = fullfile('dataset\2. Simulated\batch sim 2\loc_0_relSize_1_leakStartTime_30_isLeak_0_gasMixture_CH4_Hyd_90.mat');
+%cnn_path = 'dataset\3. WT_Converted\batch sim 2\velocity\'; % Output Data (where to save)
 
+%%
+generate_cwt(path, 'velocity');
+
+%%
 %addpath(path)
 
   

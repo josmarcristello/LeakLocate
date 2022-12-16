@@ -7,8 +7,9 @@
 %    fs: Sampling frequency (in Hz). Default value iz 2 Hz.
 %    wname: Mother wavelet name, defaults to Morlet (Gabor).
 %% Outputs
-%    N/A: 2x Image files (CWT), corresponding to the Outlet and Inlet transformation.
-%    Image name is based on 'data' name.
+%    N/A: 2x Image files (CWT), corresponding to the Outlet and Inlet
+%    transformation;.
+%    Image name is gbased on
 %% Notes
 %    The DC value obtained from Matlab is twice the actual DC value of the
 %    signal.
@@ -39,14 +40,10 @@ function generate_cwt(data, mode, wname, fs)
     Results = Results.Results;
 
     % Generates output folder and file name (based on input name)
-    [fPath, fName, ~] = fileparts(data);
+    [fPath, fName, fExt] = fileparts(data);
+
     output_folder = return_output_folder();
-    cwt_folder = "1. CWT";
-    output_subfolder = strsplit(fPath,filesep); % Gets the last folder for the input file (mimics it in the output)
-    output_folder  = fullfile(output_folder, cwt_folder, output_subfolder(end));
-    mkdir(output_folder);
-    %output_folder = output_folder + cwt_folder + "/" + output_subfolder + "/";
-    disp(output_folder);
+    name = "abc";
 
     % Assumptions that depend on the Results object.
     inlet_index = 1;
@@ -66,10 +63,14 @@ function generate_cwt(data, mode, wname, fs)
     % Inlet
     cfs_p = abs(cwt(inlet_data,wname,fs));
     im_p = ind2rgb(im2uint8(rescale(cfs_p)),jet(110));
-    imwrite(imresize(im_p,[224 224]),fullfile(output_folder,fName + "_inlet" + ".jpg"));
+    imFileName_p = strcat(name,'_inlet','.jpg');    
+    %Root_da_p = fullfile(cnn_path);Loc_da_p = fullfile(Root_da_p);
+    imwrite(imresize(im_p,[224 224]),fullfile(output_folder,imFileName_p));
     
     % Outlet
-    cfs_p = abs(cwt(outlet_data,wname,fs));
-    im_p = ind2rgb(im2uint8(rescale(cfs_p)),jet(110));
-    imwrite(imresize(im_p,[224 224]),fullfile(output_folder, fName + "_outlet" + ".jpg"));
+    cfs_p2 = abs(cwt(outlet_data,wname,fs));
+    im_p2 = ind2rgb(im2uint8(rescale(cfs_p2)),jet(110));
+    imFileName_p2 = strcat(name,'_outlet','.jpg');    
+    %Root_da_p2 = fullfile(cnn_path);Loc_da_p2 = fullfile(Root_da_p2);
+    imwrite(imresize(im_p2,[224 224]),fullfile(output_folder,imFileName_p2));
 end
