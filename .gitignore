@@ -4,8 +4,8 @@ animation - Hydraulic Model/
 outputs/
 
 # Image and video files #
-.jpg
-.avi
+*.jpg
+*.avi
 
 # Temp Matlab format
-.asv
+*.asv
