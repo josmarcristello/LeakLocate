@@ -62,7 +62,6 @@ function [cwt_inlet, cwt_outlet, output_folder] = generate_cwt(data, mode, locat
     output_folder  = fullfile(output_folder, cwt_folder, output_subfolder(end));
     verify_folder(output_folder);
     %output_folder = output_folder + cwt_folder + "/" + output_subfolder + "/";
-    disp(output_folder);
     output_folder = output_folder;
 
     %% Assumptions that depend on the Results object.
