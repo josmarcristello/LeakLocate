@@ -2,35 +2,36 @@
 % Author: Josmar Cristello
 %% Inputs
 %    data: Full path for "Results" object. Should contain a pressure and velocity sub-objects.
-%    mode: Accepts "Pressure" or "Velocity", and transforms the
-%    corresponding property. Defaults to pressure.
+%    mode: Accepts "Pressure" or "Velocity", and transforms the corresponding property. Defaults to pressure.
+%    saveResults: if 'true' saves the images. if false, doesn't.
 %    fs: Sampling frequency (in Hz). Default value iz 2 Hz.
 %    wname: Mother wavelet name, defaults to Morlet (Gabor).
 %% Outputs
 %    N/A: 2x Image files (CWT), corresponding to the Outlet and Inlet transformation.
-%    Image name is based on 'data' name.
+%    Image name is based on 'data' name. Subfolder created is also based on
+%    'data' subfolder.
 %% Notes
 %    The DC value obtained from Matlab is twice the actual DC value of the
 %    signal.
-%% To-do
-
+%% TODO
 %% Main
-
-% path = 'dataset\2. Simulated\batch sim 2\';                 % Input Data
-% cnn_path = 'dataset\3. WT_Converted\batch sim 2\velocity\'; % Output Data (where to save)
-%filename = strcat(path, name, '.mat'); % for leak dataset 
   
-function generate_cwt(data, mode, wname, fs)    
+function [img1, img2] = generate_cwt(data, mode, saveResults, wname, fs)    
+    %% Function defaults    
     % Default value → pressure
     if nargin < 2
         mode = "pressure";
     end
-    % Default value → Morlet (Garbor)    
+    % Default value → Save Results
     if nargin < 3
+        saveResults = true;
+    end
+    % Default value → Morlet (Garbor)    
+    if nargin < 4
         wname = "amor"; 
     end
     % Default value → 2 Hz
-    if nargin < 4
+    if nargin < 5
         fs = 2; 
     end
 
@@ -38,17 +39,19 @@ function generate_cwt(data, mode, wname, fs)
     Results = load(data);
     Results = Results.Results;
 
-    % Generates output folder and file name (based on input name)
+    %% Generating filename and output folder
+    %  Output Filename is based on Input filename.
+    %  Output subfolder is based on Input subfolder.
     [fPath, fName, ~] = fileparts(data);
     output_folder = return_output_folder();
     cwt_folder = "1. CWT";
     output_subfolder = strsplit(fPath,filesep); % Gets the last folder for the input file (mimics it in the output)
     output_folder  = fullfile(output_folder, cwt_folder, output_subfolder(end));
-    mkdir(output_folder);
+    verify_folder(output_folder);
     %output_folder = output_folder + cwt_folder + "/" + output_subfolder + "/";
     disp(output_folder);
 
-    % Assumptions that depend on the Results object.
+    %% Assumptions that depend on the Results object.
     inlet_index = 1;
     outlet_index = size(Results.Pressure,2);
   
@@ -66,10 +69,17 @@ function generate_cwt(data, mode, wname, fs)
     % Inlet
     cfs_p = abs(cwt(inlet_data,wname,fs));
     im_p = ind2rgb(im2uint8(rescale(cfs_p)),jet(110));
-    imwrite(imresize(im_p,[224 224]),fullfile(output_folder,fName + "_inlet" + ".jpg"));
+    im_p = imresize(im_p,[224 224]);
+    img1 = im_p;
     
     % Outlet
     cfs_p = abs(cwt(outlet_data,wname,fs));
     im_p = ind2rgb(im2uint8(rescale(cfs_p)),jet(110));
-    imwrite(imresize(im_p,[224 224]),fullfile(output_folder, fName + "_outlet" + ".jpg"));
+    im_p = imresize(im_p,[224 224]);
+    img2 = im_p;
+
+    if saveResults
+        imwrite(img1, fullfile(output_folder, fName + "_inlet" + ".jpg"));
+        imwrite(img2, fullfile(output_folder, fName + "_outlet" + ".jpg"));
+    end
 end
