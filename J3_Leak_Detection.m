@@ -1,15 +1,13 @@
-%This code is for CNN modeling
-% CNN is mainly for image recognition (Classification)
-% CNN process include;
-   % 1) Feature Learning Process
-          %(1) Multiple Layers 
-               % - Convolution Layers 
-               % - Relu 
-               % - Pooling Layers (Max, Min, Average Pooling)
-   % 2) Classification Process
-          % (1) Fully Conencted Layer - Linearize teh 2D Data 
-          % (2) Softmax - Calculate the probability 
-   
+% This function classifies a single simulated test in leak or no-leak.
+% Author: Josmar Cristello
+%% Inputs
+%    test_path: File path for a test. Should be a matlab object with pressure and velocity time-series sub-objects.
+%% Outputs
+%    dataset_path: Full path for the dataset folder of the project.
+%% TODO
+%    Currently, I have to generate a datastore. Figure out a way to classify direct from a variable (i.e. memory)
+%    Include a way to test multiple files at once.
+%% Main
 
 clear;close all;clc;
 % Change the current folder to the folder of this m-file.
@@ -17,89 +15,33 @@ if(~isdeployed)
   cd(fileparts(matlab.desktop.editor.getActiveFilename));
 end
 
-%% Define CNN Structure
-    layers = [ 
-        % First Layer
-           imageInputLayer([224 224 3], 'Name', 'input')
-           convolution2dLayer(5, 20, 'Name', 'conv_1')   
-           reluLayer('Name', 'relu_1')
-           maxPooling2dLayer(2,'Stride',2)
-        % Second Layer   
-       convolution2dLayer(3, 20, 'Padding', 0, 'Name', 'conv_2')
-           
-           %convolution2dLayer(3, 20, 'Padding', 'same', 'Name', 'conv_2')
-           reluLayer('Name', 'relu_2')
-           maxPooling2dLayer(2,'Stride',2)
-        % Third Layer   
-           convolution2dLayer(3, 20, 'Padding', 1, 'Name', 'conv_3')
-           reluLayer('Name', 'relu_3')
-           maxPooling2dLayer(2,'Stride',2)
-        % Classification  
-           fullyConnectedLayer(2, 'Name', 'fc'); % Number of Classification
-           softmaxLayer('Name', 'softmax')
-           classificationLayer('Name', 'classoutput')]; 
+%% Import test file(s)
+file_path = fullfile("F:\Onedrive\OneDrive - University of Calgary\LeakLocate\dataset\2. Simulated\batch sim 2\");
+% Gets all test files from a folder that end in .mat
+fileList = dir(file_path + "*.mat");
 
-
-%layers=net.Layers;       % whole layer information of networks
-inlayer = layers(1);      % first layer information of networks
-insz = inlayer.InputSize; % inputsize from first layer
-
-%% Import input images (Should be 2D Images)
-img_loc =  fullfile('Dataset\4. CNN\batch sim 2\pressure\'); % Location of Image Datastore
-
-images = imageDatastore(img_loc,'IncludeSubfolders',true,'LabelSource','foldernames') % the classfication subject is labelled as the folder name
-
-%count each label
-labelCount = countEachLabel(images);
-
-%% Slit training data & test data
-
-[Train, Test] = splitEachLabel(images,0.5,'randomized') % if 'randomized' is added , it splits train and test at random
-                                                        % 70% Train data 30% Test data
-                                                        
-%% Show input images at random
-numTrainImages = numel(Train.Labels);
-idx = randperm(numTrainImages,16);
-figure
-for i = 1:numTrainImages
-    %subplot(round(sqrt(numTrainImages)),round(sqrt(numTrainImages)),i)
-    %I = readimage(Train,i);
-    %imshow(I)
+%% Generate CWTs
+for i = 1:length(fileList)
+    file = strcat(fileList(i).folder, "\", fileList(i).name);
+    [~, ~, cwt_folder] = generate_cwt(file, "pressure", "inlet", true, 'amor', 2, 50);
+    %figure; imshow(img_test); % Comment out to not display the image
 end
 
-%% Define The training option
+%% Import pre-trained CNN
+load("trained_CNN.mat");
 
-%training option : Define CNN training options
-options = trainingOptions('rmsprop', ...          %sgdm %rmsprop
-    'LearnRateSchedule','piecewise', ...
-    'InitialLearnRate',0.001, ...   % Smaller value takes longer time
-    'LearnRateDropFactor',0.7, ...
-    'LearnRateDropPeriod',5, ...
-    'MaxEpochs',15, ... % Iteration
-    'MiniBatchSize',2, ...
-    'Plots','training-progress');
-    
-    
-%% Excute the Training network
-[leak_net,info] = trainNetwork(Train,layers,options);
-[leak_preds,score] = classify(leak_net,Test); % Define if you want to use gpu(Graphics Processing Unit)
-                                                                           % Using gpu has faster calculation performance
+%% Creating Datastore
+image_datastore = imageDatastore(cwt_folder,'IncludeSubfolders',true,'LabelSource','foldernames'); % the classfication subject is labelled as the folder name
 
-idx = randperm(numel(Test.Files),9);
-figure
-for i = 1:9
-    subplot(3,3,i)
-    I = readimage(Test,idx(i));
-    imshow(I)
-    label = leak_preds(idx(i));
-    title(string(label));
-end
+%% Classify the image
+[leak_preds] = classify(leak_net, image_datastore); 
+%[leak_preds] = predict(leak_net, [cwt_inlet]); 
+%disp(leak_preds);
+%disp(score);
 
-YValidation = Test.Labels;
-accuracy = mean(leak_preds == YValidation) % CNN Model Accuracy
-
-%% Save the CNN Model 
-save('trained_CNN','leak_net') % Comment out to avoid saving
+YValidation = image_datastore.Labels;
+accuracy = mean(leak_preds == YValidation); % CNN Model Accuracy
 
 %% Confusion Matrix
-plotconfusion(YValidation,leak_preds)
+%plotconfusion(YValidation,leak_preds)
+plotconfusion(YValidation, leak_preds);
