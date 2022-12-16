@@ -2,8 +2,9 @@
 % Author: Josmar Cristello
 %% Inputs
 %    data: Full path for "Results" object. Should contain a pressure and velocity sub-objects.
-%    mode: Accepts "Pressure" or "Velocity", and transforms the corresponding property. Defaults to pressure.
-%    saveResults: if 'true' saves the images. if false, doesn't.
+%    mode: "Pressure" or "Velocity", and transforms the corresponding property. Defaults to pressure.
+%    location: "inlet", "outlet", or "both".
+%    saveResults: if "true" saves the images. if "false", doesn't.
 %    fs: Sampling frequency (in Hz). Default value iz 2 Hz.
 %    wname: Mother wavelet name, defaults to Morlet (Gabor).
 %% Outputs
@@ -23,11 +24,11 @@ function [cwt_inlet, cwt_outlet] = generate_cwt(data, mode, location, saveResult
         mode = "pressure";
     end
     % Default value → true ('inlet' and 'outlet')
-    if nargin < 4
+    if nargin < 3
         location = "both";
     end
     % Default value → true (Save Results)
-    if nargin < 3
+    if nargin < 4
         saveResults = true;
     end
     % Default value → Morlet (Garbor)    
@@ -76,6 +77,7 @@ function [cwt_inlet, cwt_outlet] = generate_cwt(data, mode, location, saveResult
         im_p = ind2rgb(im2uint8(rescale(cfs_p)),jet(110));
         im_p = imresize(im_p,[224 224]);
         cwt_inlet = im_p;
+        cwt_outlet = "";
     end
     
     % Outlet
@@ -84,6 +86,7 @@ function [cwt_inlet, cwt_outlet] = generate_cwt(data, mode, location, saveResult
         im_p = ind2rgb(im2uint8(rescale(cfs_p)),jet(110));
         im_p = imresize(im_p,[224 224]);
         cwt_outlet = im_p;
+        cwt_inlet = "";
     end
 
     if saveResults
