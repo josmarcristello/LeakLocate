@@ -1,29 +1,30 @@
 close all;
 
-%% Pressure Analysis
-data1 = Results.Pressure(:,100);
-data2 = Results.Pressure(:,200);
+%% Pressure Analysis (Pressure x Time)
+index1 = 1;
+index2 = size(Results.Pressure, 2);
+data1 = Results.Pressure(:, index1);
+data2 = Results.Pressure(:, index2);
 
 figure;plot(Results.t_step, Results.Pressure(:,100)); 
-xlabel("Time [s]"); ylabel("Pressure [MPa]"); title("Pressure x Time (Pos 100)");
+xlabel("Time [s]"); ylabel("Pressure [MPa]"); title("Pressure x Time (Location index " + index1 + ")");
 xlim([min(Results.t_step), max(Results.t_step)]); ylim([min(Results.Pressure(:)), max(Results.Pressure(:))]);
 
 figure;plot(Results.t_step, Results.Pressure(:,200)); 
-xlabel("Time [s]"); ylabel("Pressure [MPa]"); title("Pressure x Time (Pos 200)");
+xlabel("Time [s]"); ylabel("Pressure [MPa]"); title("Pressure x Time (Location index " + index2 + ")");
 xlim([min(Results.t_step), max(Results.t_step)]); ylim([min(Results.Pressure(:)), max(Results.Pressure(:))]);
 
-distance = Results.x(200)-Results.x(100); % Distance btween two sensors
+distance = Results.x(index1) - Results.x(index2); % Distance btween two sensors
+disp(distance);
 
-rel_time = 0.99; % Percentual
+%% Pressure Analysis (Pressure x Time)
+rel_time = 0.4; % Percentual
 time_index = round(rel_time * size(Results.t_step,2));
 
 figure;plot(Results.x, Results.Pressure(time_index,:)); 
-xlabel("Distance [km]"); ylabel("Pressure [MPa]"); title("Pressure x Distance (time = index 1k)");
+xlabel("Distance [km]"); ylabel("Pressure [MPa]"); title("Pressure x Distance (time index " + time_index + ")");
 
-%% Velocity Analysis
-data1 = Results.Velocity(:,100);
-data2 = Results.Velocity(:,200);
-
+%%
 figure;plot(Results.t_step, data1); 
 xlabel("Time [s]"); ylabel("Velocity []"); title("Pressure x Time (Pos 100)");
 xlim([min(Results.t_step), max(Results.t_step)]); ylim([min(Results.Velocity(:)), max(Results.Velocity(:))]);
