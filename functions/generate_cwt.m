@@ -16,22 +16,26 @@
 %% TODO
 %% Main
   
-function [img1, img2] = generate_cwt(data, mode, saveResults, wname, fs)    
+function [cwt_inlet, cwt_outlet] = generate_cwt(data, mode, location, saveResults, wname, fs)    
     %% Function defaults    
     % Default value → pressure
     if nargin < 2
         mode = "pressure";
     end
-    % Default value → Save Results
+    % Default value → true ('inlet' and 'outlet')
+    if nargin < 4
+        location = "both";
+    end
+    % Default value → true (Save Results)
     if nargin < 3
         saveResults = true;
     end
     % Default value → Morlet (Garbor)    
-    if nargin < 4
+    if nargin < 5
         wname = "amor"; 
     end
     % Default value → 2 Hz
-    if nargin < 5
+    if nargin < 6
         fs = 2; 
     end
 
@@ -67,19 +71,27 @@ function [img1, img2] = generate_cwt(data, mode, saveResults, wname, fs)
     
     %% CWT Generation
     % Inlet
-    cfs_p = abs(cwt(inlet_data,wname,fs));
-    im_p = ind2rgb(im2uint8(rescale(cfs_p)),jet(110));
-    im_p = imresize(im_p,[224 224]);
-    img1 = im_p;
+    if lower(location) == "inlet" || lower(location) == "both"
+        cfs_p = abs(cwt(inlet_data,wname,fs));
+        im_p = ind2rgb(im2uint8(rescale(cfs_p)),jet(110));
+        im_p = imresize(im_p,[224 224]);
+        cwt_inlet = im_p;
+    end
     
     % Outlet
-    cfs_p = abs(cwt(outlet_data,wname,fs));
-    im_p = ind2rgb(im2uint8(rescale(cfs_p)),jet(110));
-    im_p = imresize(im_p,[224 224]);
-    img2 = im_p;
+    if lower(location) == "outlet" || lower(location) == "both"
+        cfs_p = abs(cwt(outlet_data,wname,fs));
+        im_p = ind2rgb(im2uint8(rescale(cfs_p)),jet(110));
+        im_p = imresize(im_p,[224 224]);
+        cwt_outlet = im_p;
+    end
 
     if saveResults
-        imwrite(img1, fullfile(output_folder, fName + "_inlet" + ".jpg"));
-        imwrite(img2, fullfile(output_folder, fName + "_outlet" + ".jpg"));
+        if lower(location) == "inlet" || lower(location) == "both"
+            imwrite(cwt_inlet , fullfile(output_folder, fName + "_" + lower(mode) + "_inlet" + ".jpg"));
+        end
+        if lower(location) == "outlet" || lower(location) == "both"
+            imwrite(cwt_outlet, fullfile(output_folder, fName + "_" + lower(mode) + "_outlet" + ".jpg"));
+        end        
     end
 end
