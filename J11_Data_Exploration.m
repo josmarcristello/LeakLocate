@@ -1,5 +1,8 @@
 close all;
 
+%% Import File (optional)
+file_path = fullfile('F:\Onedrive\OneDrive - University of Calgary\LeakLocate\dataset\2. Simulated\sim 3\results_no_leak.mat');
+load(file_path);
 %% Pressure Analysis (Pressure x Time)
 index1 = 1;
 index2 = size(Results.Pressure, 2);

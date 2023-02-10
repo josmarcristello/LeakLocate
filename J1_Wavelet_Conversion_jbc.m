@@ -12,11 +12,11 @@ end
 %valve = strcat('full');
 %valve = strcat('half');
 
-path = fullfile('dataset\2. Simulated\batch sim 2\loc_0_relSize_1_leakStartTime_30_isLeak_0_gasMixture_CH4_Hyd_90.mat');
+file_path = fullfile('F:\Onedrive\OneDrive - University of Calgary\LeakLocate\dataset\2. Simulated\batch sim 2\loc_0_relSize_1_leakStartTime_30_isLeak_1_gasMixture_CH4_Hyd_90.mat');
 %cnn_path = 'dataset\3. WT_Converted\batch sim 2\velocity\'; % Output Data (where to save)
 
 %%
-generate_cwt(path, 'velocity');
+[cwt_inlet, cwt_outlet] = generate_cwt(file_path, "pressure", "inlet");
 
 %%
 %addpath(path)

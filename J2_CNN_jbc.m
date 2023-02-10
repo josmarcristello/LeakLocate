@@ -46,13 +46,12 @@ insz = inlayer.InputSize; % inputsize from first layer
 
 %% Import input images (Should be 2D Images)
 img_loc =  fullfile('Dataset\4. CNN\batch sim 2\pressure\'); % Location of Image Datastore
-
-images = imageDatastore(img_loc,'IncludeSubfolders',true,'LabelSource','foldernames') % the classfication subject is labelled as the folder name
+images = imageDatastore(img_loc,'IncludeSubfolders',true,'LabelSource','foldernames'); % the classfication subject is labelled as the folder name
 
 %count each label
 labelCount = countEachLabel(images);
 
-%% Slit training data & test data
+%% Split training data & test data
 
 [Train, Test] = splitEachLabel(images,0.5,'randomized') % if 'randomized' is added , it splits train and test at random
                                                         % 70% Train data 30% Test data
@@ -85,21 +84,22 @@ options = trainingOptions('rmsprop', ...          %sgdm %rmsprop
 [leak_preds,score] = classify(leak_net,Test); % Define if you want to use gpu(Graphics Processing Unit)
                                                                            % Using gpu has faster calculation performance
 
-idx = randperm(numel(Test.Files),9);
-figure
-for i = 1:9
-    subplot(3,3,i)
-    I = readimage(Test,idx(i));
-    imshow(I)
-    label = leak_preds(idx(i));
-    title(string(label));
-end
+%idx = randperm(numel(Test.Files),9);
+%figure
+%for i = 1:9
+%    subplot(3,3,i)
+%    I = readimage(Test,idx(i));
+%    imshow(I)
+%    label = leak_preds(idx(i));
+%    title(string(label));
+%end
 
 YValidation = Test.Labels;
 accuracy = mean(leak_preds == YValidation) % CNN Model Accuracy
 
 %% Save the CNN Model 
 save('trained_CNN','leak_net') % Comment out to avoid saving
+%save('info','info')           % Comment out to avoid saving
 
 %% Confusion Matrix
 plotconfusion(YValidation,leak_preds)
