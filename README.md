@@ -1,4 +1,4 @@
 # LeakLocate
  
 Sofware Flowchart:
-![Software Flowchart](FlowChart.jpg?raw=true "Title")
+![Software Flowchart](FlowChart.png?raw=true "Title")
